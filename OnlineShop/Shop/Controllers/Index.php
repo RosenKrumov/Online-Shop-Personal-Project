@@ -4,9 +4,13 @@
 namespace Controllers;
 
 
-class Index
+use Framework\DefaultController;
+
+class Index extends DefaultController
 {
     public function index(){
-        echo 'works';
+        $data = ['isLogged' => $this->isLoggedIn()];
+        $this->view->appendToLayout('main', 'index');
+        $this->view->display('Layouts.default', $data);
     }
 }

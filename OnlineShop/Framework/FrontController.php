@@ -4,6 +4,7 @@ namespace Framework;
 
 use Framework\Routers\DefaultRouter;
 use Framework\Routers\IRouter;
+use ReflectionClass;
 
 class FrontController
 {
@@ -11,6 +12,13 @@ class FrontController
     private $namespace = null;
     private $controller = null;
     private $method = null;
+    /**
+     * @var InputData
+     */
+    private $input = null;
+    /**
+     * @var IRouter
+     */
     private $router = null;
 
     private function __construct()
@@ -37,6 +45,7 @@ class FrontController
         $_uri = $this->router->getUri();
         $routes = App::getInstance()->getConfig()->routes;
         $configParams = null;
+
         if (is_array($routes) && count($routes) > 0) {
             foreach ($routes as $key => $value) {
                 if (stripos($_uri, $key) === 0 &&
@@ -60,12 +69,15 @@ class FrontController
             throw new \Exception('Default route missing', 500);
         }
 
+        $this->input = InputData::getInstance();
         $_params = explode('/', $_uri);
         if ($_params[0]) {
             $this->controller = strtolower($_params[0]);
 
             if ($_params[1]) {
                 $this->method = strtolower($_params[1]);
+                unset($_params[0], $_params[1]);
+                $this->input->setGet(array_values($_params));
             } else {
                 $this->method = $this->getDefaultMethod();
             }
@@ -83,10 +95,11 @@ class FrontController
             }
         }
 
+        $this->input->setPost($this->router->getPost());
         //TODO Fix
         $controller = $this->namespace . '\\' . ucfirst($this->controller);
         $newController = new $controller();
-        $newController->{$this->method}();
+        $this->loadMethod($newController);
     }
 
     public function getDefaultController()
@@ -114,5 +127,100 @@ class FrontController
         }
 
         return self::$_instance;
+    }
+
+    private function loadMethod($newController)
+    {
+        $isMethodExists = false;
+
+        $reflectionController = new ReflectionClass($newController);
+        $reflectionMethods = $reflectionController->getMethods();
+
+        $roles = App::getInstance()->getInstance()->getConfig()->roles;
+
+        $bindingModel = null;
+
+        foreach ($reflectionMethods as $reflectionMethod) {
+            if ($this->method === $reflectionMethod->getName()) {
+                $doc = $reflectionMethod->getDocComment();
+
+                $annotations = array();
+                preg_match_all('#@(.*?)\n#s', $doc, $annotations);
+                foreach ($annotations[1] as $annotation) {
+                    $annotation = trim($annotation);
+                    if ($annotation === "POST" && $this->input->hasGet()) {
+                        throw new \Exception("Cannot access Post method with Get request", 406);
+                    }
+                    if ($annotation === "GET" && $this->input->hasPost()) {
+                        throw new \Exception("Cannot access Get method with Post request", 406);
+                    }
+                    foreach ($roles as $role) {
+                        if ($role === $annotation) {
+                            // TODO if user in role -> pass him
+                            throw new \Exception("You are not " . strtolower($role) . " to do this", 401);
+                        }
+                    }
+                }
+
+                if($this->input->hasPost()){
+                    $bindingModel = $this->BindModel($annotations[1]);
+                }
+
+                $isMethodExists = true;
+            }
+        }
+
+        if ($isMethodExists) {
+            if($bindingModel){
+                $newController->{$this->method}($bindingModel);
+            } else {
+                $newController->{$this->method}();
+            }
+        } else {
+            throw new \Exception("This action do not exists", 404);
+        }
+    }
+
+    private function BindModel($annotations)
+    {
+        $bindingNamespace = null;
+        $appConfig = App::getInstance()->getConfig()->app;
+        $namespaces = $appConfig['namespaces'];
+        foreach ($namespaces as $key => $value) {
+            if (strpos($key, "BindingModels")) {
+                $bindingNamespace = $key;
+            }
+        }
+        $bindingModelName = null;
+        foreach ($annotations as $annotation) {
+            $bindingAnnotation = explode(' ', $annotation);
+            if (trim($bindingAnnotation[0]) === 'BindingModels') {
+                $bindingModelName = trim($bindingAnnotation[1]);
+            }
+        }
+        $bindingModel = null;
+        if ($bindingNamespace && $bindingModelName) {
+            $bindingModelClass = $bindingNamespace . "\\" . $bindingModelName;
+            $bindingModel = new $bindingModelClass;
+            $reflectionModel = new ReflectionClass($bindingModel);
+            $properties = $reflectionModel->getProperties();
+            $post = $this->input->post();
+            foreach ($properties as $property) {
+                $propertyName = ucfirst($property->getName());
+                $propertyDoc = $property->getDocComment();
+                $annotations = array();
+                preg_match_all('#@(.*?)\n#s', $propertyDoc, $annotations);
+                $set = 'set' . $propertyName;
+                if (trim($annotations[1][0]) === "Required" && !$post[$propertyName]) {
+                    throw new \Exception("Field " . $propertyName . " is required");
+                }
+                if (array_key_exists($propertyName, $post)) {
+                    $bindingModel->$set($post[$propertyName]);
+                } else {
+                    throw new \Exception("Field " . $propertyName . " is not accepted");
+                }
+            }
+        }
+        return $bindingModel;
     }
 }

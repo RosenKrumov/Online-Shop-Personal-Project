@@ -27,36 +27,24 @@ class InputData
         }
     }
 
-    public function hasGet($id){
-        return array_key_exists($id, $this->_get);
+    public function hasGet(){
+        return count($this->_get) > 0;
     }
 
-    public function hasPost($name){
-        return array_key_exists($name, $this->_post);
+    public function hasPost(){
+        return count($this->_post) > 0;
     }
 
     public function hasCookies($name){
         return array_key_exists($name, $this->_cookies);
     }
 
-    public function get($id, $normalize = null, $default = null){
-        if($this->hasGet($id)){
-            if($normalize != null){
-                return Common::normalize($this->_get[$id], $normalize);
-            }
-            return $this->_get[$id];
-        }
-        return $default;
+    public function get(){
+        return $this->_get;
     }
 
-    public function post($name, $normalize = null, $default = null){
-        if($this->hasPost($name)){
-            if($normalize != null){
-                return Common::normalize($this->_post[$name], $normalize);
-            }
-            return $this->_post[$name];
-        }
-        return $default;
+    public function post(){
+        return $this->_post;
     }
 
     public function cookies($name, $normalize = null, $default = null){
