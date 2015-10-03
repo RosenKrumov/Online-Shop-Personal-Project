@@ -12,6 +12,23 @@ class ProfileViewModel
     private $cash;
     private $role;
     private $isLogged = true;
+    private $csrfToken;
+
+    /**
+     * @return mixed
+     */
+    public function getCsrfToken()
+    {
+        return $this->csrfToken;
+    }
+
+    /**
+     * @param mixed $csrfToken
+     */
+    public function setCsrfToken($csrfToken)
+    {
+        $this->csrfToken = $csrfToken;
+    }
 
     public function isLogged(){
         return $this->isLogged;
@@ -22,7 +39,11 @@ class ProfileViewModel
      */
     public function getUsername($escaping = true)
     {
-        return Common::xss_clean($this->username);
+        if($escaping){
+            return htmlspecialchars($this->username);
+        } else {
+            return $this->username;
+        }
     }
 
     /**

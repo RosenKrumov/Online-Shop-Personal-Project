@@ -31,9 +31,10 @@ class Users extends DefaultController
     public function login(){
         if($this->isLoggedIn()){
             header('Location: \users\profile');
+            $this->session->csrf = uniqid();
             exit;
         }
-
+        $this->session->csrf = uniqid();
         $this->view->appendToLayout('main', 'login');
         $this->view->display('layouts.default');
     }
@@ -41,9 +42,10 @@ class Users extends DefaultController
     public function register(){
         if($this->isLoggedIn()){
             header('Location: \users\profile');
+            $this->session->csrf = uniqid();
             exit;
         }
-
+        $this->session->csrf = uniqid();
         $this->view->appendToLayout('main', 'register');
         $this->view->display('layouts.default');
     }
@@ -51,10 +53,12 @@ class Users extends DefaultController
     public function profile(){
         if(!$this->isLoggedIn()){
             header('Location: \users\login');
+            $this->session->csrf = uniqid();
             exit;
         }
-
+        $this->session->csrf = uniqid();
         $viewModel = $this->data->getInfo($this->session->userid);
+        $viewModel->setCsrfToken($this->session->csrf);
 
         $this->view->appendToLayout('main', 'profile');
         $this->view->display('profile', $viewModel);
@@ -64,7 +68,11 @@ class Users extends DefaultController
      * @BindingModels EditProfileBindingModel
      */
     public function editprofile(EditProfileBindingModel $bindingModel){
+
         if($bindingModel){
+            if($this->input->post()['CsrfToken'] !== $this->session->csrf) {
+                throw new \Exception('CSRF Token invalid');
+            }
             if($bindingModel->getNewPass() !== $bindingModel->getConfirmPass()){
                 throw new \Exception('Passwords do not match');
             } else {
@@ -73,6 +81,7 @@ class Users extends DefaultController
                     throw new \Exception('Cannot change password');
                 } else {
                     header('Location: /users/profile');
+                    $this->session->csrf = uniqid();
                 }
             }
         }
@@ -83,6 +92,9 @@ class Users extends DefaultController
      */
     public function editcash(EditCashBindingModel $bindingModel){
         if($bindingModel){
+            if($this->input->post()['CsrfToken'] !== $this->session->csrf) {
+                throw new \Exception('CSRF Token invalid');
+            }
             if(!is_numeric($bindingModel->getCash()) || !is_numeric($bindingModel->getConfirm())){
                 throw new \Exception('Cash must be a number!');
             }
@@ -94,6 +106,7 @@ class Users extends DefaultController
                     throw new \Exception('Cannot change cash');
                 } else {
                     header('Location: /users/profile');
+                    $this->session->csrf = uniqid();
                 }
             }
         }
@@ -133,11 +146,13 @@ class Users extends DefaultController
     public function logout(){
         if(!$this->isLoggedIn()){
             header('Location: /users/login');
+            $this->session->csrf = uniqid();
             exit;
         }
 
         $this->session->destroySession();
         header('Location: /');
+        $this->session->csrf = uniqid();
         exit;
     }
 
@@ -149,6 +164,7 @@ class Users extends DefaultController
         $userId = $this->data->login($user);
         if($userId){
             $this->session->userid = $userId;
+            $this->session->csrf = md5(uniqid(rand(), true));
         } else {
             throw new \Exception('Cannot login user');
         }

@@ -201,6 +201,10 @@
                 ->setClasses("grey")
                 ->setValue("Change password")
                 ->create()
+                ->initHiddenField()
+                ->setName("CsrfToken")
+                ->setValue($this->data->getCsrfToken())
+                ->create()
                 ->render()?>
         </div>
         <p style="font-size: 25px;">Welcome, <?= $this->data->getUsername(true) ?></p>
@@ -225,6 +229,10 @@
                 ->initSubmit()
                 ->setClasses("grey")
                 ->setValue("Change cash")
+                ->create()
+                ->initHiddenField()
+                ->setName("CsrfToken")
+                ->setValue($this->data->getCsrfToken())
                 ->create()
                 ->render()?>
         </div>

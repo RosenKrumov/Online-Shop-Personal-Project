@@ -1,6 +1,6 @@
 <?php
 
-namespace Areas\Admin\Models\BindingModels;
+namespace Models\BindingModels;
 
 
 class AdminLoginBindingModel

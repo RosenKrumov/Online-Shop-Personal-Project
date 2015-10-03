@@ -6,6 +6,7 @@ namespace Framework\ViewHelpers;
 
 use Framework\ViewHelpers\Elements\Checkbox;
 use Framework\ViewHelpers\Elements\EmailField;
+use Framework\ViewHelpers\Elements\HiddenField;
 use Framework\ViewHelpers\Elements\PasswordField;
 use Framework\ViewHelpers\Elements\RadioButton;
 use Framework\ViewHelpers\Elements\Submit;
@@ -108,5 +109,9 @@ class FormViewHelper
     public static function initSubmit()
     {
         return new Submit();
+    }
+
+    public static function initHiddenField(){
+        return new HiddenField();
     }
 }

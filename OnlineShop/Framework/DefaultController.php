@@ -47,4 +47,8 @@ abstract class DefaultController
     protected function isLoggedIn(){
         return $this->session->userid;
     }
+
+    protected function isAdminLoggedIn(){
+        return $this->session->adminId;
+    }
 }
