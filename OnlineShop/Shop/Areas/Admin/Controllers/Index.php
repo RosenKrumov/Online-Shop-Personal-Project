@@ -11,6 +11,7 @@ use Models\BindingModels\AdminLoginBindingModel;
 class Index extends DefaultController
 {
     public function index(){
+        $this->session->csrf = uniqid();
         if($this->isAdminLoggedIn()){
             header('Location: /admin/index/home');
         }
@@ -28,29 +29,33 @@ class Index extends DefaultController
 
             if($adminId){
                 $this->session->adminId = $adminId;
+                $this->session->csrf = uniqid();
             } else {
                 throw new \Exception('Cannot login user');
             }
 
             header('Location: /admin/index/home');
+            $this->session->csrf = uniqid();
         }
     }
 
     public function home(){
+        $this->session->csrf = uniqid();
         if(!$this->isAdminLoggedIn()){
             header('Location: /admin');
         }
-
         $data = new DbAppManipulation();
         $productsCategories =  $data->loadData();
+        $viewData = ['productsCategories' => $productsCategories, 'csrf' => $this->session->csrf];
         $this->view->setViewDirectory('../areas/admin/views');
         $this->view->appendToLayout("admin", "home");
-        $this->view->display('home', $productsCategories);
+        $this->view->display('home', $viewData);
     }
 
     public function logout()
     {
         $this->session->destroySession();
         header("Location: /admin/");
+        $this->session->csrf = uniqid();
     }
 }

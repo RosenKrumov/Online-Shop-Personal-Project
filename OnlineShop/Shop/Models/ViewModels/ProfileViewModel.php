@@ -13,6 +13,40 @@ class ProfileViewModel
     private $role;
     private $isLogged = true;
     private $csrfToken;
+    private $navbarData = [];
+    private $products = [];
+
+    /**
+     * @return array
+     */
+    public function getProducts()
+    {
+        return $this->products;
+    }
+
+    /**
+     * @param array $products
+     */
+    public function setProducts($products)
+    {
+        $this->products = $products;
+    }
+
+    /**
+     * @return array
+     */
+    public function getNavbarData()
+    {
+        return $this->navbarData;
+    }
+
+    /**
+     * @param array $navbarData
+     */
+    public function setNavbarData($key, $value)
+    {
+        $this->navbarData[$key] = $value;
+    }
 
     /**
      * @return mixed

@@ -16,8 +16,10 @@ class Products extends DefaultController
      * @BindingModels AddProductBindingModel
      */
     public function add(AddProductBindingModel $bindingModel){
+        $this->session->csrf = uniqid();
         if(!$this->isAdminLoggedIn()){
             header('Location: /admin');
+            $this->session->csrf = uniqid();
         }
 
         if($bindingModel){
@@ -36,6 +38,7 @@ class Products extends DefaultController
             $success = $data->addProduct($product, $this->session->adminId);
             if($success){
                 header('Location: /admin/index/home');
+                $this->session->csrf = uniqid();
             } else {
                 throw new \Exception('Cannot add product');
             }
@@ -43,6 +46,7 @@ class Products extends DefaultController
     }
 
     public function edit(){
+        $this->session->csrf = uniqid();
         if(!$this->isAdminLoggedIn()){
             header('Location: /admin');
             exit;
@@ -55,9 +59,10 @@ class Products extends DefaultController
         $data = new DbAppManipulation();
         $id = $this->input->get()[0];
         $product = $data->loadProduct($id);
+        $viewData = ['product' => $product, 'csrf' => $this->session->csrf];
         $this->view->setViewDirectory('../areas/admin/views');
         $this->view->appendToLayout("admin", "home");
-        $this->view->display('editproduct', $product);
+        $this->view->display('editproduct', $viewData);
     }
 
     /**
@@ -66,9 +71,13 @@ class Products extends DefaultController
     public function editpost(EditProductBindingModel $bindingModel){
         if(!$this->isAdminLoggedIn()){
             header('Location: /admin');
+            $this->session->csrf = uniqid();
         }
 
         if($bindingModel){
+            if($this->input->post()['csrf'] !== $this->session->csrf){
+                throw new \Exception('Token invalid');
+            }
             if(!is_numeric($bindingModel->getProductprice()) ||
                 $bindingModel->getProductquantity() < 0 ||
                 $bindingModel->getProductprice() < 0) {
@@ -85,6 +94,7 @@ class Products extends DefaultController
             $success = $data->editProduct($product);
             if($success){
                 header('Location: /admin/index/home');
+                $this->session->csrf = uniqid();
             } else {
                 throw new \Exception('Cannot edit product');
             }
@@ -94,7 +104,12 @@ class Products extends DefaultController
     public function delete(){
         if(!$this->isAdminLoggedIn()){
             header('Location: /admin');
+            $this->session->csrf = uniqid();
             exit;
+        }
+
+        if($this->input->get()[1] !== $this->session->csrf) {
+            throw new \Exception('Token invalid');
         }
 
         if(!is_numeric($this->input->get()[0])){
@@ -106,6 +121,7 @@ class Products extends DefaultController
         $success = $data->deleteProduct($id);
         if($success){
             header('Location: /admin/index/home');
+            $this->session->csrf = uniqid();
             exit;
         } else {
             throw new \Exception('Cannot delete product');

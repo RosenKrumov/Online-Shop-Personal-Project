@@ -11,6 +11,7 @@ use Models\BindingModels\EditProfileBindingModel;
 use Models\BindingModels\LoginBindingModel;
 use Models\BindingModels\RegisterBindingModel;
 use Models\DatabaseModels\User;
+use Models\Repositories\ShopData;
 use Models\Repositories\UserData;
 use Models\ViewModels\ProfileViewModel;
 
@@ -34,9 +35,11 @@ class Users extends DefaultController
             $this->session->csrf = uniqid();
             exit;
         }
+        $brandsCategories = ShopData::getInstance()->loadCategories();
+        $data = ['isLogged' => $this->isLoggedIn(), 'brandsCategories' => $brandsCategories];
         $this->session->csrf = uniqid();
         $this->view->appendToLayout('main', 'login');
-        $this->view->display('layouts.default');
+        $this->view->display('layouts.default', $data);
     }
 
     public function register(){
@@ -45,9 +48,76 @@ class Users extends DefaultController
             $this->session->csrf = uniqid();
             exit;
         }
+        $brandsCategories = ShopData::getInstance()->loadCategories();
+        $data = ['isLogged' => $this->isLoggedIn(), 'brandsCategories' => $brandsCategories];
         $this->session->csrf = uniqid();
         $this->view->appendToLayout('main', 'register');
-        $this->view->display('layouts.default');
+        $this->view->display('layouts.default', $data);
+    }
+
+    public function cart(){
+        if(!$this->isLoggedIn()){
+            header('Location: \users\login');
+            $this->session->csrf = uniqid();
+            exit;
+        }
+
+        $this->session->csrf = uniqid();
+        $brandsCategories = ShopData::getInstance()->loadCategories();
+        $products = $this->data->getCartProducts($this->session->userid);
+        $data = [
+            'isLogged' => $this->isLoggedIn(),
+            'brandsCategories' => $brandsCategories,
+            'products' => $products,
+            'csrf' => $this->session->csrf
+        ];
+        $this->view->appendToLayout('main', 'cart');
+        $this->view->display('layouts.default', $data);
+    }
+
+    public function removeproductfromcart(){
+        if(!$this->isLoggedIn()){
+            header('Location: \users\login');
+            $this->session->csrf = uniqid();
+            exit;
+        }
+
+        if($this->input->get()[1] !== $this->session->csrf){
+            throw new \Exception('Token invalid');
+        }
+
+        $productId = $this->input->get()[0];
+        $userId = $this->session->userid;
+        $success = $this->data->removeProductFromCart($productId, $userId);
+
+        if($success){
+            header('Location: /users/cart');
+            $this->session->csrf = uniqid();
+            exit;
+        } else {
+            throw new \Exception('Cannot delete product from cart');
+        }
+    }
+
+    public function checkout(){
+        if(!$this->isLoggedIn()){
+            header('Location: \users\login');
+            $this->session->csrf = uniqid();
+            exit;
+        }
+
+        if($this->input->get()[0] !== $this->session->csrf){
+            throw new \Exception('Token invalid');
+        }
+
+        $this->session->csrf = uniqid();
+        $success = $this->data->checkout($this->session->userid);
+        if($success){
+            header('Location: /users/profile');
+            exit;
+        } else {
+            throw new \Exception('Cannot checkout the cart');
+        }
     }
 
     public function profile(){
@@ -56,9 +126,14 @@ class Users extends DefaultController
             $this->session->csrf = uniqid();
             exit;
         }
+
         $this->session->csrf = uniqid();
         $viewModel = $this->data->getInfo($this->session->userid);
         $viewModel->setCsrfToken($this->session->csrf);
+
+        $brandsCategories = ShopData::getInstance()->loadCategories();
+        $viewModel->setNavbarData('brands', $brandsCategories['brands']);
+        $viewModel->setNavbarData('categories', $brandsCategories['categories']);
 
         $this->view->appendToLayout('main', 'profile');
         $this->view->display('profile', $viewModel);

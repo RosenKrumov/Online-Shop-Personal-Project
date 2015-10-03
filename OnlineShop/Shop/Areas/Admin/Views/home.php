@@ -6,10 +6,10 @@
 <form action="/admin/products/add" method="post">
     <?php
     $start = \Framework\ViewHelpers\DropdownViewHelper::init()->setAttribute("name", "Category");
-    foreach ($this->data['categories'] as $category) {
+    foreach ($this->productsCategories['categories'] as $category) {
         $start->initOption()
             ->setValue($category['id'])
-            ->setInnerValue($category['name'])
+            ->setInnerValue(htmlspecialchars($category['name']))
             ->create();
     }
     $start->render()
@@ -33,16 +33,16 @@
         <th>Edit</th>
         <th>Delete</th>
     </tr>
-        <?php foreach($this->data['products'] as $product): ?>
+        <?php foreach($this->productsCategories['products'] as $product): ?>
         <tr>
             <td><?= $product['id'] ?></td>
-            <td><?= $product['name'] ?></td>
-            <td><?= $product['model'] ?></td>
+            <td><?= htmlspecialchars($product['name']) ?></td>
+            <td><?= htmlspecialchars($product['model']) ?></td>
             <td><?= $product['price'] ?></td>
             <td><?= $product['quantity'] ?></td>
-            <td><?= $product['categoryName'] ?></td>
+            <td><?= htmlspecialchars($product['categoryName']) ?></td>
             <td><a href="/admin/products/edit/<?=$product['id']?>">Edit</a></td>
-            <td><a href="/admin/products/delete/<?=$product['id']?>">Delete</a></td>
+            <td><a href="/admin/products/delete/<?=$product['id']?>/<?=$this->csrf?>">Delete</a></td>
         </tr>
         <?php endforeach;?>
 </table>

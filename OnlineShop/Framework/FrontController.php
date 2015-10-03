@@ -154,11 +154,11 @@ class FrontController
                     if ($annotation === "GET" && $this->input->hasPost()) {
                         throw new \Exception("Cannot access Get method with Post request", 406);
                     }
-                    foreach ($roles as $role) {
-                        if ($role === $annotation) {
-                            // TODO if user in role -> pass him
-                            throw new \Exception("You are not " . strtolower($role) . " to do this", 401);
-                        }
+                    if($annotation == 'Authorize' && !$_SESSION['userid']){
+                        throw new \Exception('You are not authorized to do this');
+                    }
+                    if($annotation == 'Admin' && !$_SESSION['adminId']){
+                        throw new \Exception('You are not admin');
                     }
                 }
 

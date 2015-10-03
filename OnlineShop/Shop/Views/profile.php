@@ -33,7 +33,7 @@
                 <?php if($this->data->isLogged()) {
                     echo '<div class="shopping_cart">
                     <div class="cart">
-                        <a href="#" title="View my shopping cart" rel="nofollow">
+                        <a href="/users/cart" title="View my shopping cart" rel="nofollow">
                             <strong class="opencart"> </strong>
                             <span class="cart_title">Cart</span>
                             <span class="no_product">(empty)</span>
@@ -51,123 +51,21 @@
         <div class="menu">
             <ul id="dc_mega-menu-orange" class="dc_mm-orange">
                 <li><a href="/">Home</a></li>
-                <li><a href="products.html">Products</a>
+                <li><a href="#">Categories</a>
                     <ul>
-                        <li><a href="products.html">Mobile Phones</a>
-                            <ul>
-                                <li><a href="preview-2.html">Product 1</a></li>
-                                <li><a href="preview-3.html">Product 2</a></li>
-                                <li><a href="#">Product 3</a></li>
-                                <li><a href="#">Product 4</a></li>
-                                <li><a href="preview-6.html">Product 5</a></li>
-                                <li><a href="#">Product 6</a></li>
-                            </ul>
-                        </li>
-                        <li><a href="products.html">Desktop</a>
-                            <ul>
-                                <li><a href="preview.html">Product 1</a></li>
-                                <li><a href="preview-5.html">Product 2</a></li>
-                                <li><a href="preview-3.html">Product 3</a></li>
-                                <li><a href="#">Product 4</a></li>
-                                <li><a href="#">Product 5</a></li>
-                                <li><a href="#">Product 6</a></li>
-                            </ul>
-                        </li>
-                        <li><a href="products.html">Laptop</a>
-                            <ul>
-                                <li><a href="preview-2.html">Product 10</a></li>
-                                <li><a href="preview-5.html">Product 11</a></li>
-                                <li><a href="#">Product 12</a></li>
-                                <li><a href="#">Product 13</a></li>
-                            </ul>
-                        </li>
-                        <li><a href="#">Accessories</a>
-                            <ul>
-                                <li><a href="#">Product 14</a></li>
-                                <li><a href="#">Product 15</a></li>
-                            </ul>
-                        </li>
-                        <li><a href="#">Software</a>
-                            <ul>
-                                <li><a href="#">Product 16</a></li>
-                                <li><a href="#">Product 17</a></li>
-                                <li><a href="#">Product 18</a></li>
-                                <li><a href="#">Product 19</a></li>
-                            </ul>
-                        </li>
-                        <li><a href="#">Sports & Fitness</a>
-                            <ul>
-                                <li><a href="#">Product 16</a></li>
-                                <li><a href="#">Product 17</a></li>
-                                <li><a href="#">Product 18</a></li>
-                                <li><a href="#">Product 19</a></li>
-                            </ul>
-                        </li>
-                        <li><a href="#">Footwear</a>
-                            <ul>
-                                <li><a href="#">Product 16</a></li>
-                                <li><a href="#">Product 17</a></li>
-                                <li><a href="#">Product 18</a></li>
-                                <li><a href="#">Product 19</a></li>
-                            </ul>
-                        </li>
-                        <li><a href="#">Jewellery</a>
-                            <ul>
-                                <li><a href="#">Product 16</a></li>
-                                <li><a href="#">Product 17</a></li>
-                                <li><a href="#">Product 18</a></li>
-                                <li><a href="#">Product 19</a></li>
-                            </ul>
-                        </li>
-                        <li><a href="#">Clothing</a>
-                            <ul>
-                                <li><a href="#">Product 16</a></li>
-                                <li><a href="#">Product 17</a></li>
-                                <li><a href="#">Product 18</a></li>
-                                <li><a href="#">Product 19</a></li>
-                            </ul>
-                        </li>
-                        <li><a href="#">Home Decor & Kitchen</a>
-                            <ul>
-                                <li><a href="#">Product 16</a></li>
-                                <li><a href="#">Product 17</a></li>
-                                <li><a href="#">Product 18</a></li>
-                                <li><a href="#">Product 19</a></li>
-                            </ul>
-                        </li>
-                        <li><a href="#">Beauty & Healthcare</a>
-                            <ul>
-                                <li><a href="#">Product 16</a></li>
-                                <li><a href="#">Product 17</a></li>
-                                <li><a href="#">Product 18</a></li>
-                                <li><a href="#">Product 19</a></li>
-                            </ul>
-                        </li>
-                        <li><a href="#">Toys, Kids & Babies</a>
-                            <ul>
-                                <li><a href="#">Product 16</a></li>
-                                <li><a href="#">Product 17</a></li>
-                                <li><a href="#">Product 18</a></li>
-                                <li><a href="#">Product 19</a></li>
-                            </ul>
-                        </li>
+                        <?php foreach($this->data->getNavbarData()['categories'] as $category): ?>
+                            <li><a href="/products/brands/<?=$category['name']?>"><?=htmlspecialchars($category['name'])?></a></li>
+                        <?php endforeach; ?>
                     </ul>
                 </li>
-                <li><a href="products.html">Top Brands</a>
+                <li><a href="#">Top Brands</a>
                     <ul>
-                        <li><a href="products.html">Brand Name 1</a></li>
-                        <li><a href="products.html">Brand Name 2</a></li>
-                        <li><a href="products.html">Brand Name 3</a></li>
-                        <li><a href="#">Brand Name 4</a></li>
-                        <li><a href="#">Brand Name 5</a></li>
-                        <li><a href="#">Brand Name 6</a></li>
-                        <li><a href="#">Brand Name 7</a></li>
-                        <li><a href="#">Brand Name 8</a></li>
-                        <li><a href="#">Brand Name 9</a></li>
-                        <li><a href="#">Brand Name 10</a></li>
+                        <?php foreach($this->data->getNavbarData()['brands'] as $brand): ?>
+                            <li><a href="/products/brands/<?=$brand['name']?>"><?=htmlspecialchars($brand['name'])?></a></li>
+                        <?php endforeach; ?>
                     </ul>
                 </li>
-                <li><a href="contact.html">Contact</a></li>
+                <li><a href="/index/contact">Contact</a></li>
                 <?= $this->data->isLogged() ? '' : '<li><a href="/users/login">Login</a></li>' ?>
                 <?= $this->data->isLogged() ? '' : '<li><a href="/users/register">Register</a></li>' ?>
                 <?= $this->data->isLogged() ? '<li><a href="/users/logout">Logout</a></li>' : '' ?>
@@ -210,6 +108,7 @@
         <p style="font-size: 25px;">Welcome, <?= $this->data->getUsername(true) ?></p>
         <p style="font-size: 25px;">Cash:  <?= $this->data->getCash() ?>$</p>
         <p style="font-size: 25px;">Role: <?= $this->data->getRole() ?></p>
+
         <div class="login_panel" style="float: right; margin-top: -88px;">
             <h3>Change cash</h3>
             <?= \Framework\ViewHelpers\FormViewHelper::init()
@@ -236,7 +135,15 @@
                 ->create()
                 ->render()?>
         </div>
+
         <div class="clear"></div>
+        <p style="font-size: 25px;">Products: <?= count($this->data->getProducts()) === 0 ? 'You have no products yet' : '' ?> </p>
+
+        <?php foreach($this->data->getProducts() as $product):?>
+            <p>Name: <?= htmlspecialchars($product['name'])?></p>
+            <p>Model: <?= htmlspecialchars($product['model'])?></p>
+            <p>Quantity: <?= $product['count']?></p>
+        <?php endforeach; ?>
     </div>
 </div>
 <div class="footer">
